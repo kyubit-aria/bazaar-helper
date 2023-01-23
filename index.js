@@ -3,8 +3,7 @@ const path = require('node:path');
 const {Client, Collection, Events, GatewayIntentBits} = require('discord.js');
 require('dotenv/config');
 
-
-
+//Initialise Client
 const client  = new Client(
     {
         intents: 
@@ -24,11 +23,9 @@ function constructPath(local_path)
     return path.join(__dirname, local_path);
 }
 
-
 client.commands = new Collection();
 const commandsPath = constructPath('commands');
 const commandFiles = getJSFiles(commandsPath);
-console.log(commandsPath);
 for(const file of commandFiles)
 {
     const filePath = path.join(commandsPath, file);
@@ -46,7 +43,6 @@ for(const file of commandFiles)
 
 const eventsPath = constructPath('events');
 const eventsFiles = getJSFiles(eventsPath);
-console.log(eventsPath);
 for(const file of eventsFiles)
 {
     const filePath = path.join(eventsPath, file);

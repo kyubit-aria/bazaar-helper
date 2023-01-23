@@ -3,18 +3,23 @@ const { JSDOM } = require( "jsdom" );
 const { window } = new JSDOM();
 $ = jQuery = require('jquery')(window)
 
+// Computes characterwise string difference
+// if one string is longer than the other
+// the sum of the remaining characters is added
+// to the difference
 function difference(first,toCompare) 
 {
     let diff = 0;
     let max_index = Math.min( toCompare.length,first.length)
     let largest_index = Math.max( toCompare.length,first.length)
     
-
     for(let i = 0 ; i < max_index ; i++) 
     {
+        // Add the ascii difference at each position in the string
         diff += Math.abs(first.charCodeAt(i) - toCompare.charCodeAt(i));
     }
 
+    // Add the sum of the ascii values of the remainder
     if(first.length > toCompare.length) {
         for(let j = max_index ; j < largest_index ; j++) 
         {
@@ -29,6 +34,31 @@ function difference(first,toCompare)
         }
     }
 
+    return diff;
+}
+
+// Computes Word similarity
+// hits are weighted twice as heavily than misses
+function score(first,toCompare) 
+{
+    let diff = 0;
+    let smaller_index = Math.min( toCompare.length,first.length);
+    let larger_index = Math.max( toCompare.length,first.length);
+
+    for(let i = 0 ; i < smaller_index ; i++) 
+    {
+        if(Math.abs(first.charCodeAt(i) - toCompare.charCodeAt(i)) == 0) 
+        {
+            diff+=2; // There is an exact match at a position
+        } 
+        else 
+        {
+            diff--; // The characters don't match
+        }
+    }
+
+    // The remaining characters won't match so add the length of remainder
+    diff -= Math.abs(smaller_index - larger_index);
     return diff;
 }
 
@@ -49,25 +79,27 @@ module.exports =
         await $.get( process.env.GET_HTTP, function( data )
         {
             
-            let currentLowest;
-            let currentDifference = 0;
-            let lowestDifference = 10000000;
+            let currentElement;
+            let currentScore = 0;
+            let bestScore = -1000;
             
+            // Find element that matches best to input string
             $.each(data.products, function(index, element)
             {
-                currentDifference = difference(element.quick_status.productId, item);
-                if(currentDifference < lowestDifference) 
+                currentScore = score(element.quick_status.productId, item);
+                if(currentScore > bestScore) 
                 {
-                    currentLowest = element;
-                    lowestDifference = currentDifference;
+                    currentElement = element;
+                    bestScore = currentScore;
                 }
             });
 
-            interaction.reply(`${currentLowest.quick_status.productId}
-                Sell Price: ${currentLowest.quick_status.sellPrice}
-                Sell Volume: ${currentLowest.quick_status.sellVolume}
-                Buy Price: ${currentLowest.quick_status.buyPrice}
-                Buy Volume: ${currentLowest.quick_status.buyVolume}`);
+            // Send matched Element Data back
+            interaction.reply(`${currentElement.quick_status.productId}
+                Sell Price: ${currentElement.quick_status.sellPrice}
+                Sell Volume: ${currentElement.quick_status.sellVolume}
+                Buy Price: ${currentElement.quick_status.buyPrice}
+                Buy Volume: ${currentElement.quick_status.buyVolume}`);
         }
         ,'json'
         );
