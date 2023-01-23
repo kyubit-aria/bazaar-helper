@@ -1,7 +1,7 @@
 {
   "name": "bazaarhelper",
   "version": "1.0.0",
-  "description": "",
+  "description": "The bot prints the market data of the specified item.",
   "main": "index.js",
   "dependencies": {
     "discord.js": "^14.7.1",
@@ -14,5 +14,13 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nekomartyr/bazaar-helper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nekomartyr/bazaar-helper/issues"
+  },
+  "homepage": "https://github.com/nekomartyr/bazaar-helper#readme"
 }
