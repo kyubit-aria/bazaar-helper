@@ -76,10 +76,16 @@ module.exports =
     async execute(interaction)
     {
         const item = interaction.options.getString('item_name').toUpperCase();
+        const { Configuration, OpenAIApi } = require("openai");
+        const configuration = new Configuration({
+          apiKey: process.env.OPENAI_API_KEY,
+        });
+        const openai = new OpenAIApi(configuration);
+        
+       let thePrompt = '';
+       let currentElement;
         await $.get( process.env.GET_HTTP, function( data )
-        {
-            
-            let currentElement;
+        {   
             let currentScore = 0;
             let bestScore = -1000;
             
@@ -93,15 +99,33 @@ module.exports =
                     bestScore = currentScore;
                 }
             });
-
             // Send matched Element Data back
-            interaction.reply(`${currentElement.quick_status.productId}
-                Sell Price: ${currentElement.quick_status.sellPrice}
-                Sell Volume: ${currentElement.quick_status.sellVolume}
-                Buy Price: ${currentElement.quick_status.buyPrice}
-                Buy Volume: ${currentElement.quick_status.buyVolume}`);
+            thePrompt = "Write a short sentence about: " + `${currentElement.quick_status.productId}`.toLowerCase()
+
+
         }
         ,'json'
         );
+
+        const messagesTo = [{ role: "user", content: thePrompt }];
+
+        const response = await openai.createChatCompletion({
+            model: "gpt-3.5-turbo",
+            messages: messagesTo,
+            max_tokens: 25,
+            temperature: 0.7,
+            stop: ['\n', 'User:', 'Bot:']
+        });
+
+        console.log(response.data.choices[0].message.content)
+
+        finalResponse = `Product: ${currentElement.quick_status.productId}\n`+
+            `\tSell Price: ${currentElement.quick_status.sellPrice}\n` + 
+            `\tSell Volume: ${currentElement.quick_status.sellVolume}\n` + 
+            `\tBuy Price: ${currentElement.quick_status.buyPrice}\n` +
+            `\tBuy Volume: ${currentElement.quick_status.buyVolume}\n` +
+            `${response.data.choices[0].message.content}`
+
+        interaction.reply(finalResponse);
     },
 }

@@ -22,4 +22,4 @@ initialise project using npm using
 
 then
 
-```npm install discord.js dotenv jquery jsdom```
+```npm install discord.js dotenv jquery jsdom openai```

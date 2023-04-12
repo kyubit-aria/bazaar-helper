@@ -58,6 +58,8 @@ for(const file of eventsFiles)
     }
 }
 
+
+
 client.login(process.env.TOKEN);
 
 
